@@ -1,0 +1,101 @@
+#include<bits/stdc++.h>
+using namespace std;
+class Node{
+public:
+	char ch;
+	bool isWord;
+	map<char,Node*>m;
+	Node(char ch){
+		this->ch=ch;
+		isWord=false;
+	}
+};
+class Trie{
+public:
+	Node*root;
+	Trie(){
+		root=new Node('\0');
+	}
+	void add(string s);
+	void predictions(string s);
+    bool search(string word);
+};
+bool Trie::search(string word){
+    Node*temp = root;
+    for(long long i=0;i<word.length();i++){
+        char ch = word[i];
+        if(temp->m.find(ch)==temp->m.end()){
+            return false;
+        }
+        else{
+            temp = temp->m[ch];
+        }
+    }
+    return temp->isWord;
+}
+void Trie::add(string s){
+    Node*t=root;
+	for(long long i=0;i<s.length();i++){
+		if(root->m.find(s[i])==root->m.end()){
+			Node*newNode = new Node(s[i]);
+			root->m[s[i]] = newNode;
+		}
+		root=root->m[s[i]];
+		if(i==s.length()-1)root->isWord=true;
+	}
+    root=t;
+}
+
+bool f(Node*root,string s, long long i, vector<char> op){
+	op.push_back(root->ch);
+	if(op.size()<s.length()){
+        if(root->m.find(s[i+1])==root->m.end()) return false;
+        return f(root->m[s[i+1]],s,i+1,op);
+    }
+    bool ans = root->isWord;
+    if(root->isWord){
+        for(vector<char>::iterator x:op) cout<<x;
+        cout<<endl;
+    }
+    for(auto x:root->m){
+        ans =  f(x.second,s,i+1,op) or ans;
+    }
+    return ans;
+}
+void Trie::predictions(string s){
+    vector<char>op;
+    Node*temp = root;
+    if(root->m.find(s[0])==root->m.end()){
+        cout<<"No suggestions"<<endl;
+        return;
+    }
+    temp=root->m[s[0]];
+	bool ans = f(temp,s,0,op);
+    if(!ans) cout<<"No suggestions"<<endl;
+}
+
+int main(){
+//NUMBER OF WORDS TO BE ADDED
+	long long n; cin>>n;
+	Trie t;
+    set<string> strings;
+    //ADD THE WORDS
+	for(long long i=0;i<n;i++){
+		string s; cin>>s;
+		// t.add(s);
+        strings.insert(s);
+	}
+    for(auto s:strings) t.add(s);
+    //QUERIES
+	long long q; cin>>q;
+  //WORDS TO BE SEARCHED
+	while(q--){
+		string s; cin>>s;
+		// cout<<t.search(s)<<endl;
+        t.predictions(s);
+        // cout<<endl;
+	}
+    // cout<<t.search("rat");
+    // t.predictions("r");
+	return 0;
+}
